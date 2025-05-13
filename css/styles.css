@@ -23,3 +23,8 @@ body {
     border: 2px solid #fff;
     color: #0f0;
   }
+  #next {
+    background: #000;
+    border: 2px solid #fff;
+    margin-top: 10px;
+  }

@@ -181,6 +181,9 @@ class Piece {
           if (dropInterval < 100) dropInterval = 100;
           updateScore();
         }
+        piece = nextPiece;
+        nextPiece = randomPiece();
+        drawNextPiece();
       }
 
     moveLeft() {
@@ -223,10 +226,15 @@ let lines = 0;
 let level = 0;
 
 function updateScore() {
-    console.log(`Score: ${score} | Lines: ${lines} | Level: ${level}`);
-}
+    document.getElementById("score").textContent = `Score: ${score}`;
+    document.getElementById("lines").textContent = `Lines: ${lines}`;
+    document.getElementById("level").textContent = `Level: ${level}`;
+  }
 
-let piece = randomPiece();
+let nextPiece = randomPiece();
+let piece = nextPiece;
+nextPiece = randomPiece();
+drawNextPiece();
 
 const board = new Board(ROWS, COLS);
 board.draw(context);
@@ -276,6 +284,29 @@ document.addEventListener('keydown', (e) => {
   
     update();
     requestAnimationFrame(gameLoop);
+  }
+
+  function drawNextPiece() {
+    const canvas = document.getElementById("next");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+    const shape = nextPiece.shape;
+    const color = nextPiece.color;
+    const cellSize = 30;
+    const offsetX = 1;
+    const offsetY = 1;
+  
+    shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value) {
+          ctx.fillStyle = color;
+          ctx.fillRect((x + offsetX) * cellSize, (y + offsetY) * cellSize, cellSize, cellSize);
+          ctx.strokeStyle = "#000";
+          ctx.strokeRect((x + offsetX) * cellSize, (y + offsetY) * cellSize, cellSize, cellSize);
+        }
+      });
+    });
   }
   
   gameLoop();
