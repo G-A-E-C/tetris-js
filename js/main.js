@@ -84,8 +84,8 @@ class Board {
     this.grid.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value) {
-            context.fillStyle = value;
-            context.fillRect(x, y, 1, 1);
+          context.fillStyle = value; // ahora 'value' es el color
+          context.fillRect(x, y, 1, 1);
         } else {
           context.strokeStyle = '#222';
           context.strokeRect(x, y, 1, 1);
@@ -231,13 +231,13 @@ function updateScore() {
     document.getElementById("level").textContent = `Level: ${level}`;
   }
 
-let nextPiece = randomPiece();
-let piece = nextPiece;
-nextPiece = randomPiece();
-drawNextPiece();
+  const board = new Board(ROWS, COLS); // ✅ primero creamos el tablero
 
-const board = new Board(ROWS, COLS);
-board.draw(context);
+  let nextPiece = randomPiece();       // luego ya podemos crear piezas
+  let piece = nextPiece;
+  nextPiece = randomPiece();
+
+    board.draw(context);
 
 function update() {
     context.clearRect(0, 0, canvas.width, canvas.height);
@@ -269,14 +269,12 @@ document.addEventListener('keydown', (e) => {
   let dropInterval = 1000; // 1 segundo por nivel inicial
   let lastTime = 0;
   let gameId;
-  let isRunning = false;
+  let isRunning = true;
   let isPaused = false;
 
+
   function gameLoop(time = 0) {
-    if (!isRunning || isPaused) {
-      requestAnimationFrame(gameLoop);
-      return;
-    }
+    if (!isRunning) return;
   
     const deltaTime = time - lastTime;
     lastTime = time;
@@ -285,7 +283,9 @@ document.addEventListener('keydown', (e) => {
     if (dropCounter > dropInterval) {
       const locked = piece.moveDown();
       if (locked) {
-        piece = randomPiece(); // nueva pieza
+        piece = nextPiece;
+        nextPiece = randomPiece();
+        drawNextPiece();
       }
       dropCounter = 0;
     }
@@ -340,4 +340,4 @@ document.getElementById("startBtn").addEventListener("click", startGame);
 document.getElementById("pauseBtn").addEventListener("click", pauseGame);
 document.getElementById("restartBtn").addEventListener("click", restartGame);
 
-  gameLoop();
+gameLoop();
