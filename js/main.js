@@ -269,25 +269,26 @@ document.addEventListener('keydown', (e) => {
   let dropInterval = 1000; // 1 segundo por nivel inicial
   let lastTime = 0;
   let gameId;
+  let isRunning = false;
+  let isPaused = false;
 
   function gameLoop(time = 0) {
+    if (!isRunning || isPaused) {
+      requestAnimationFrame(gameLoop);
+      return;
+    }
+  
     const deltaTime = time - lastTime;
     lastTime = time;
     dropCounter += deltaTime;
-    gameId = requestAnimationFrame(gameLoop);
   
     if (dropCounter > dropInterval) {
-        const locked = piece.moveDown();
-        if (locked) {
-          if (isGameOver()) {
-            cancelAnimationFrame(gameId);
-            alert("Game Over");
-            return;
-          }
-          piece = randomPiece();
-        }
-        dropCounter = 0;
+      const locked = piece.moveDown();
+      if (locked) {
+        piece = randomPiece(); // nueva pieza
       }
+      dropCounter = 0;
+    }
   
     update();
     requestAnimationFrame(gameLoop);
@@ -316,8 +317,27 @@ document.addEventListener('keydown', (e) => {
     });
   }
   
+  function startGame() {
+    if (!isRunning) {
+      isRunning = true;
+      gameLoop();
+    }
+  }
+  
+  function pauseGame() {
+    isPaused = !isPaused;
+  }
+  
+  function restartGame() {
+    location.reload();
+  }
+
   function isGameOver() {
     return piece.y === 0 && piece.hasCollision();
   }
+
+document.getElementById("startBtn").addEventListener("click", startGame);
+document.getElementById("pauseBtn").addEventListener("click", pauseGame);
+document.getElementById("restartBtn").addEventListener("click", restartGame);
 
   gameLoop();
