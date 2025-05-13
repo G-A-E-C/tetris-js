@@ -84,8 +84,8 @@ class Board {
     this.grid.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value) {
-          context.fillStyle = 'cyan';
-          context.fillRect(x, y, 1, 1);
+            context.fillStyle = value;
+            context.fillRect(x, y, 1, 1);
         } else {
           context.strokeStyle = '#222';
           context.strokeRect(x, y, 1, 1);
@@ -166,7 +166,7 @@ class Piece {
             if (value) {
               const x = this.x + dx;
               const y = this.y + dy;
-              this.board.grid[y][x] = 1;
+              this.board.grid[y][x] = this.color; 
             }
           });
         });
@@ -268,19 +268,26 @@ document.addEventListener('keydown', (e) => {
   let dropCounter = 0;
   let dropInterval = 1000; // 1 segundo por nivel inicial
   let lastTime = 0;
-  
+  let gameId;
+
   function gameLoop(time = 0) {
     const deltaTime = time - lastTime;
     lastTime = time;
     dropCounter += deltaTime;
+    gameId = requestAnimationFrame(gameLoop);
   
     if (dropCounter > dropInterval) {
-      const locked = piece.moveDown();
-      if (locked) {
-        piece = randomPiece(); // nueva pieza
+        const locked = piece.moveDown();
+        if (locked) {
+          if (isGameOver()) {
+            cancelAnimationFrame(gameId);
+            alert("Game Over");
+            return;
+          }
+          piece = randomPiece();
+        }
+        dropCounter = 0;
       }
-      dropCounter = 0;
-    }
   
     update();
     requestAnimationFrame(gameLoop);
@@ -309,4 +316,8 @@ document.addEventListener('keydown', (e) => {
     });
   }
   
+  function isGameOver() {
+    return piece.y === 0 && piece.hasCollision();
+  }
+
   gameLoop();
