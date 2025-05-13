@@ -93,6 +93,25 @@ class Board {
       });
     });
   }
+
+  clearLines() {
+    let linesCleared = 0;
+  
+    this.grid = this.grid.filter(row => {
+      if (row.every(cell => cell !== 0)) {
+        linesCleared++;
+        return false; // eliminar esta línea
+      }
+      return true;
+    });
+  
+    // Agregar filas vacías arriba
+    while (this.grid.length < this.rows) {
+      this.grid.unshift(Array(this.cols).fill(0));
+    }
+  
+    return linesCleared;
+  }
 }
 
 class Piece {
@@ -142,16 +161,27 @@ class Piece {
     }
   
     lock() {
-      this.shape.forEach((row, dy) => {
-        row.forEach((value, dx) => {
-          if (value) {
-            const x = this.x + dx;
-            const y = this.y + dy;
-            this.board.grid[y][x] = 1; // más adelante será color o valor
-          }
+        this.shape.forEach((row, dy) => {
+          row.forEach((value, dx) => {
+            if (value) {
+              const x = this.x + dx;
+              const y = this.y + dy;
+              this.board.grid[y][x] = 1;
+            }
+          });
         });
-      });
-    }
+      
+        const cleared = this.board.clearLines();
+      
+        if (cleared > 0) {
+          score += this.calculateScore(cleared);
+          lines += cleared;
+          level = Math.floor(lines / 10);
+          dropInterval = 1000 - level * 100;
+          if (dropInterval < 100) dropInterval = 100;
+          updateScore();
+        }
+      }
 
     moveLeft() {
         this.x--;
@@ -176,12 +206,24 @@ class Piece {
           this.shape = prevShape; // revertir si hay colisión
         }
     }
+    calculateScore(clearedLines) {
+        const linePoints = [0, 100, 300, 500, 800];
+        return linePoints[clearedLines] || clearedLines * 200;
+    }
 } 
 
 function randomPiece() {
     const types = Object.keys(TETROMINOS);
     const rand = types[Math.floor(Math.random() * types.length)];
     return new Piece(TETROMINOS[rand], board);
+}
+
+let score = 0;
+let lines = 0;
+let level = 0;
+
+function updateScore() {
+    console.log(`Score: ${score} | Lines: ${lines} | Level: ${level}`);
 }
 
 let piece = randomPiece();
@@ -193,7 +235,7 @@ function update() {
     context.clearRect(0, 0, canvas.width, canvas.height);
     board.draw(context);
     piece.draw(context);
-  }
+}
   
 update();
 

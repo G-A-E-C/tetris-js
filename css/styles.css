@@ -13,3 +13,13 @@ body {
     display: block;
     margin: 20px auto;
   }
+  #scoreBoard {
+    position: absolute;
+    top: 20px;
+    left: 320px;
+    font-family: monospace;
+    background: #111;
+    padding: 10px;
+    border: 2px solid #fff;
+    color: #0f0;
+  }
