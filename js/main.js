@@ -152,6 +152,30 @@ class Piece {
         });
       });
     }
+
+    moveLeft() {
+        this.x--;
+        if (this.hasCollision()) {
+          this.x++;
+        }
+    }
+      
+    moveRight() {
+        this.x++;
+        if (this.hasCollision()) {
+          this.x--;
+        }
+    }
+      
+    rotate() {
+        const prevShape = this.shape;
+        this.shape = this.shape[0].map((_, i) =>
+          this.shape.map(row => row[i]).reverse()
+        );
+        if (this.hasCollision()) {
+          this.shape = prevShape; // revertir si hay colisión
+        }
+    }
 } 
 
 function randomPiece() {
@@ -164,3 +188,52 @@ let piece = randomPiece();
 
 const board = new Board(ROWS, COLS);
 board.draw(context);
+
+function update() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    board.draw(context);
+    piece.draw(context);
+  }
+  
+update();
+
+document.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowLeft':
+        piece.moveLeft();
+        break;
+      case 'ArrowRight':
+        piece.moveRight();
+        break;
+      case 'ArrowDown':
+        piece.moveDown();
+        break;
+      case 'ArrowUp':
+        piece.rotate();
+        break;
+    }
+    update();
+  });
+
+  let dropCounter = 0;
+  let dropInterval = 1000; // 1 segundo por nivel inicial
+  let lastTime = 0;
+  
+  function gameLoop(time = 0) {
+    const deltaTime = time - lastTime;
+    lastTime = time;
+    dropCounter += deltaTime;
+  
+    if (dropCounter > dropInterval) {
+      const locked = piece.moveDown();
+      if (locked) {
+        piece = randomPiece(); // nueva pieza
+      }
+      dropCounter = 0;
+    }
+  
+    update();
+    requestAnimationFrame(gameLoop);
+  }
+  
+  gameLoop();
